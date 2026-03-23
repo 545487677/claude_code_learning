@@ -115,18 +115,44 @@ curl -X PUT \
 ```
 
 ### 步骤7: 清理分支
-合并后询问是否删除源分支：
+合并后清理所有分支，只保留main分支：
 
 ```bash
 # 切换回main
 git checkout main
 git pull origin main
 
-# 删除本地分支
-git branch -d ${CURRENT_BRANCH}
-
-# 删除远程分支
+# 删除当前工作分支
+git branch -D ${CURRENT_BRANCH}
 git push origin --delete ${CURRENT_BRANCH}
+
+# 清理所有其他分支（只保留main）
+echo "🧹 清理其他分支..."
+
+# 删除所有本地分支（除main外）
+LOCAL_BRANCHES=$(git branch | grep -v "main" | grep -v "\*" | xargs)
+if [ -n "$LOCAL_BRANCHES" ]; then
+  for branch in $LOCAL_BRANCHES; do
+    git branch -D "$branch" && echo "✅ 删除本地分支: $branch"
+  done
+else
+  echo "ℹ️  没有其他本地分支需要清理"
+fi
+
+# 删除所有远程分支（除main外）
+REMOTE_BRANCHES=$(git branch -r | grep -v "main" | grep -v "HEAD" | sed 's/origin\///' | xargs)
+if [ -n "$REMOTE_BRANCHES" ]; then
+  for branch in $REMOTE_BRANCHES; do
+    git push origin --delete "$branch" 2>/dev/null && echo "✅ 删除远程分支: $branch" || echo "⏭️  跳过: $branch"
+  done
+else
+  echo "ℹ️  没有其他远程分支需要清理"
+fi
+
+# 清理远程分支的本地引用
+git remote prune origin
+
+echo "✅ 分支清理完成，只保留 main 分支"
 ```
 
 ### 步骤8: 生成报告
@@ -151,10 +177,16 @@ git push origin --delete ${CURRENT_BRANCH}
    链接: https://github.com/user/repo/pull/123
 
 ✅ 清理状态: 完成
-   本地分支: 已删除
-   远程分支: 已删除
+   工作分支: 已删除
+   其他分支: 已清理
+   保留分支: main
 
-🎉 所有步骤执行成功！
+🧹 分支清理:
+   删除本地分支: 2个
+   删除远程分支: 2个
+   当前分支: main
+
+🎉 所有步骤执行成功！只保留 main 分支
 ```
 
 ## 配置要求
@@ -222,3 +254,4 @@ Claude:
 - `/commit` - 创建提交
 - `/test` - 只运行测试
 - `/merge` - 只合并PR
+- `/cleanup-branches` - 清理所有分支，只保留main
