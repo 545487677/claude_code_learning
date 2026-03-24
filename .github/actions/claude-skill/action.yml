@@ -1,0 +1,81 @@
+name: 'Run Claude Code Skill'
+description: 'Execute a Claude Code skill in CI/CD pipeline'
+author: 'Your Name'
+
+inputs:
+  skill:
+    description: 'Skill command to run (e.g., /cleanup-branches, /test)'
+    required: true
+  anthropic-api-key:
+    description: 'Anthropic API Key for Claude Code'
+    required: true
+  working-directory:
+    description: 'Working directory to run the skill in'
+    default: '.'
+    required: false
+  auto-confirm:
+    description: 'Auto-confirm prompts (use with caution)'
+    default: 'false'
+    required: false
+
+outputs:
+  result:
+    description: 'Skill execution result'
+    value: ${{ steps.run-skill.outputs.result }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate inputs
+      shell: bash
+      run: |
+        if [ -z "${{ inputs.skill }}" ]; then
+          echo "Error: skill input is required"
+          exit 1
+        fi
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Claude Code
+      shell: bash
+      run: |
+        echo "📦 Installing Claude Code CLI..."
+        npm install -g @anthropic-ai/claude-code
+
+    - name: Run Claude Skill
+      id: run-skill
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+      run: |
+        echo "🤖 Running skill: ${{ inputs.skill }}"
+
+        AUTO_CONFIRM_FLAG=""
+        if [ "${{ inputs.auto-confirm }}" == "true" ]; then
+          AUTO_CONFIRM_FLAG="--auto-confirm"
+        fi
+
+        claude --non-interactive "${{ inputs.skill }}" $AUTO_CONFIRM_FLAG 2>&1 | tee skill-output.log
+
+        # Capture result
+        if [ $? -eq 0 ]; then
+          echo "result=success" >> $GITHUB_OUTPUT
+        else
+          echo "result=failure" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: claude-skill-logs
+        path: skill-output.log
+        retention-days: 7
+
+branding:
+  icon: 'cpu'
+  color: 'blue'

@@ -1,0 +1,122 @@
+name: Weekly Branch Maintenance
+
+on:
+  schedule:
+    - cron: '0 2 * * 1' # 每周一凌晨2点
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run mode (no actual deletion)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Analyze branches
+        id: analyze
+        run: |
+          LOCAL_BRANCHES=$(git branch | grep -v "main" | grep -v "\*" || true)
+          REMOTE_BRANCHES=$(git branch -r | grep -v "main" | grep -v "HEAD" || true)
+          LOCAL_COUNT=$(echo "$LOCAL_BRANCHES" | grep -c . || echo "0")
+          REMOTE_COUNT=$(echo "$REMOTE_BRANCHES" | grep -c . || echo "0")
+
+          echo "local_count=$LOCAL_COUNT" >> $GITHUB_OUTPUT
+          echo "remote_count=$REMOTE_COUNT" >> $GITHUB_OUTPUT
+
+          echo "### 📊 分支分析" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- 待清理本地分支数: $LOCAL_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- 待清理远程分支数: $REMOTE_COUNT" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$LOCAL_COUNT" -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "#### 本地分支列表：" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$LOCAL_BRANCHES" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "$REMOTE_COUNT" -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "#### 远程分支列表：" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$REMOTE_BRANCHES" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Run cleanup script
+        if: steps.analyze.outputs.local_count > 0 || steps.analyze.outputs.remote_count > 0
+        run: |
+          chmod +x scripts/cleanup-branches.sh
+
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            echo "🔍 Dry run mode - 仅显示将要删除的分支，不实际执行删除"
+            echo ""
+            echo "本地分支:"
+            git branch | grep -v "main" | grep -v "\*" || echo "  (无)"
+            echo ""
+            echo "远程分支:"
+            git branch -r | grep -v "main" | grep -v "HEAD" || echo "  (无)"
+          else
+            ./scripts/cleanup-branches.sh
+          fi
+
+      - name: Create summary
+        if: always()
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🧹 清理结果" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            echo "- 模式: 🔍 Dry Run (未实际删除)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- 模式: 🗑️  实际清理" >> $GITHUB_STEP_SUMMARY
+            echo "- 已清理本地分支: ${{ steps.analyze.outputs.local_count }}" >> $GITHUB_STEP_SUMMARY
+            echo "- 已清理远程分支: ${{ steps.analyze.outputs.remote_count }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "- 状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 执行时间: $(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '⚠️ 分支清理失败',
+              body: `分支清理任务执行失败。
+
+              **详细信息:**
+              - 工作流运行: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              - 触发方式: ${{ github.event_name }}
+              - 分支: ${{ github.ref }}
+
+              请查看工作流日志以了解详细错误信息。`,
+              labels: ['maintenance', 'ci', 'bug']
+            })
