@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   cleanup:
@@ -37,37 +38,59 @@ jobs:
       - name: Analyze branches
         id: analyze
         run: |
-          LOCAL_BRANCHES=$(git branch | grep -v "main" | grep -v "\*" || true)
-          REMOTE_BRANCHES=$(git branch -r | grep -v "main" | grep -v "HEAD" || true)
-          LOCAL_COUNT=$(echo "$LOCAL_BRANCHES" | grep -c . || echo "0")
-          REMOTE_COUNT=$(echo "$REMOTE_BRANCHES" | grep -c . || echo "0")
+          # 获取分支列表
+          LOCAL_BRANCHES=$(git branch 2>/dev/null | grep -v "main" | grep -v "\*" || true)
+          REMOTE_BRANCHES=$(git branch -r 2>/dev/null | grep -v "main" | grep -v "HEAD" || true)
 
-          echo "local_count=$LOCAL_COUNT" >> $GITHUB_OUTPUT
-          echo "remote_count=$REMOTE_COUNT" >> $GITHUB_OUTPUT
-
-          echo "### 📊 分支分析" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- 待清理本地分支数: $LOCAL_COUNT" >> $GITHUB_STEP_SUMMARY
-          echo "- 待清理远程分支数: $REMOTE_COUNT" >> $GITHUB_STEP_SUMMARY
-
-          if [ "$LOCAL_COUNT" -gt 0 ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "#### 本地分支列表：" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "$LOCAL_BRANCHES" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+          # 计数（确保是数字）
+          if [ -z "$LOCAL_BRANCHES" ]; then
+            LOCAL_COUNT=0
+          else
+            LOCAL_COUNT=$(echo "$LOCAL_BRANCHES" | grep -c '^' || echo "0")
           fi
 
-          if [ "$REMOTE_COUNT" -gt 0 ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "#### 远程分支列表：" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "$REMOTE_BRANCHES" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+          if [ -z "$REMOTE_BRANCHES" ]; then
+            REMOTE_COUNT=0
+          else
+            REMOTE_COUNT=$(echo "$REMOTE_BRANCHES" | grep -c '^' || echo "0")
+          fi
+
+          # 输出到 GITHUB_OUTPUT
+          echo "local_count=${LOCAL_COUNT}" >> "$GITHUB_OUTPUT"
+          echo "remote_count=${REMOTE_COUNT}" >> "$GITHUB_OUTPUT"
+
+          # 添加到 Summary
+          {
+            echo "### 📊 分支分析"
+            echo ""
+            echo "- 待清理本地分支数: ${LOCAL_COUNT}"
+            echo "- 待清理远程分支数: ${REMOTE_COUNT}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # 如果有本地分支，显示列表
+          if [ "${LOCAL_COUNT}" -gt 0 ]; then
+            {
+              echo ""
+              echo "#### 本地分支列表："
+              echo '```'
+              echo "$LOCAL_BRANCHES"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          # 如果有远程分支，显示列表
+          if [ "${REMOTE_COUNT}" -gt 0 ]; then
+            {
+              echo ""
+              echo "#### 远程分支列表："
+              echo '```'
+              echo "$REMOTE_BRANCHES"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Run cleanup script
-        if: steps.analyze.outputs.local_count > 0 || steps.analyze.outputs.remote_count > 0
+        if: ${{ steps.analyze.outputs.local_count > 0 || steps.analyze.outputs.remote_count > 0 }}
         run: |
           chmod +x scripts/cleanup-branches.sh
 
@@ -86,20 +109,26 @@ jobs:
       - name: Create summary
         if: always()
         run: |
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🧹 清理结果" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          {
+            echo ""
+            echo "### 🧹 清理结果"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
-            echo "- 模式: 🔍 Dry Run (未实际删除)" >> $GITHUB_STEP_SUMMARY
+            echo "- 模式: 🔍 Dry Run (未实际删除)" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "- 模式: 🗑️  实际清理" >> $GITHUB_STEP_SUMMARY
-            echo "- 已清理本地分支: ${{ steps.analyze.outputs.local_count }}" >> $GITHUB_STEP_SUMMARY
-            echo "- 已清理远程分支: ${{ steps.analyze.outputs.remote_count }}" >> $GITHUB_STEP_SUMMARY
+            {
+              echo "- 模式: 🗑️  实际清理"
+              echo "- 已清理本地分支: ${{ steps.analyze.outputs.local_count }}"
+              echo "- 已清理远程分支: ${{ steps.analyze.outputs.remote_count }}"
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
-          echo "- 状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 执行时间: $(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "- 状态: ${{ job.status }}"
+            echo "- 执行时间: $(date +'%Y-%m-%d %H:%M:%S')"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Notify on failure
         if: failure()
