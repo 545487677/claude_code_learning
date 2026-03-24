@@ -1,68 +1,151 @@
-# 📚 文档中心
+# Claude Code 完整学习文档
 
-本目录包含 Claude Code Learning 项目的所有文档。
+<div align="center">
 
-## 📁 目录结构
+**Claude Code 组件能力总结、学习路径与测试指南**
 
-```
-docs/
-├── cicd/           # CI/CD 集成文档
-│   ├── INTEGRATION.md    # 完整集成指南
-│   └── QUICK_START.md    # 快速开始
-└── mcp/            # MCP (Model Context Protocol) 学习文档
-    ├── README.md               # MCP 概述
-    ├── github_mcp.md           # GitHub MCP 使用
-    ├── claude_integration_guide.md  # Claude 集成指南
-    ├── pr_issue_management.md  # PR/Issue 管理
-    ├── skills_guide.md         # Skills 开发指南
-    └── session_summary.md      # 学习会话总结
-```
+📅 更新时间: 2024-03-24
 
-## 🚀 快速导航
+[English](#english) | [中文](#中文)
 
-### CI/CD 集成
-- **新手入门**: [快速开始指南](cicd/QUICK_START.md)
-- **完整文档**: [CI/CD 集成指南](cicd/INTEGRATION.md)
-
-### MCP 学习
-- **开始学习**: [MCP 学习概述](mcp/README.md)
-- **GitHub 集成**: [GitHub MCP 使用指南](mcp/github_mcp.md)
-- **Skills 开发**: [自定义 Skills 指南](mcp/skills_guide.md)
-
-## 📖 推荐阅读顺序
-
-### 初学者路径
-1. [MCP 学习概述](mcp/README.md) - 了解 MCP 基础概念
-2. [快速开始 CI/CD](cicd/QUICK_START.md) - 5分钟配置自动化
-3. [Skills 开发指南](mcp/skills_guide.md) - 创建自己的技能
-
-### 进阶路径
-1. [完整 CI/CD 集成](cicd/INTEGRATION.md) - 所有平台的集成方案
-2. [GitHub MCP 深度使用](mcp/github_mcp.md) - PR/Issue 自动化
-3. [Claude 集成最佳实践](mcp/claude_integration_guide.md)
-
-## 🛠️ 实践资源
-
-- **Skills 库**: `../.claude/skills/` - 查看已实现的 skills
-- **脚本库**: `../scripts/` - 独立的自动化脚本
-- **CI/CD 配置**: `../.github/workflows/` - 实际的工作流配置
-
-## 💡 贡献文档
-
-欢迎改进文档！文档组织原则：
-
-1. **cicd/** - CI/CD、自动化、DevOps 相关
-2. **mcp/** - MCP、Claude Code、AI 集成相关
-3. 保持文档简洁、实用、有代码示例
-
-## 📝 文档规范
-
-- 使用 Markdown 格式
-- 包含代码示例和实际用例
-- 提供目录和导航链接
-- 中英文混合时注意格式
+</div>
 
 ---
 
-**最后更新**: 2026-03-24
-**维护者**: Claude Code Learning Project
+## 📊 项目统计
+
+| 类型 | 数量 | 详解文档 | 状态 |
+|------|------|---------|------|
+| **Agents** | 118 | 1 个 | ✅ 已整合 |
+| **Skills** | 22 | 8 个 | ✅ 已整合 |
+| **Hooks** | 26 | 完整 | ✅ 已配置 |
+| **Commands** | 26 | 待补充 | ✅ 已整合 |
+| **总计** | **192** | **完整文档系统** | **学习就绪** |
+
+---
+
+## 📚 文档目录
+
+### 🤖 [Agents - 专业 AI 助手](./agents/README.md)
+
+118 个专业领域的 AI agents，涵盖：
+
+- **五星必选**（10 个）：python-pro、typescript-pro、rust-engineer、kubernetes-specialist 等
+- **语言专家**（25 个）：覆盖主流编程语言
+- **前端专家**（15 个）：React、Vue、Angular、Next.js 等
+- **基础设施**（12 个）：Docker、K8s、Terraform、云架构
+- **AI & ML**（8 个）：LLM、MLOps、NLP、强化学习
+- **数据**（7 个）：数据科学、工程、DBA
+- **商业 & 产品**（9 个）：PM、BA、市场调研
+- **其他专业领域**：内容、工作流、设计、金融、游戏等
+
+**详解文档**：
+- [python-pro-详解.md](./agents/python-pro-详解.md) - Python 3.11+ 专家（12KB，180行）
+
+**快速开始**：
+\`\`\`bash
+# 查看 agents 能力总结
+cat docs/agents/README.md
+
+# 使用特定 agent
+"请使用 python-pro agent 帮我优化这个 Python 函数"
+\`\`\`
+
+---
+
+### 🎯 [Skills - 工作流与方法论](./skills/README.md)
+
+22 个开发工作流，包含：
+
+- **TDD 核心**（5 个）⭐⭐⭐⭐⭐：test-driven-development、brainstorming、writing-plans、verification-before-completion、systematic-debugging
+- **工作空间管理**（2 个）：using-git-worktrees、receiving-code-review
+- **企业级自动化**（8 个）：autonomous-skill、deep-research、github-review-pr、kiro-skill、spec-kit-skill 等
+- **子系统开发**（2 个）：subagent-driven-development、writing-skills
+- **自定义 Skills**（5 个）：cleanup-branches、cleanup-files、merge、push-test-merge、test
+
+**详解文档**（8 个已完成）：
+- [brainstorming-详解.md](./skills/brainstorming-详解.md)
+- [test-driven-development-详解.md](./skills/test-driven-development-详解.md)
+- [systematic-debugging-详解.md](./skills/systematic-debugging-详解.md)
+- [verification-before-completion-详解.md](./skills/verification-before-completion-详解.md)
+- [writing-plans-详解.md](./skills/writing-plans-详解.md)
+- [using-git-worktrees-详解.md](./skills/using-git-worktrees-详解.md)
+- [receiving-code-review-详解.md](./skills/receiving-code-review-详解.md)
+- [autonomous-skill-详解.md](./skills/autonomous-skill-详解.md)
+
+**快速开始**：
+\`\`\`bash
+# 使用 TDD skill
+/test-driven-development
+\`\`\`
+
+---
+
+### 🔧 [Hooks - 事件驱动自动化](./hooks/README.md)
+
+26 个 hook 脚本，实现自动化
+
+**配置级别**：
+- **最小配置**：仅会话管理（初学者）
+- **标准配置**：Git 提醒 + 格式化 + 检查（推荐）⭐
+- **完整配置**：所有质量检查（高级用户）
+
+**快速开始**：
+\`\`\`bash
+# 运行配置向导
+./.claude/hooks/configure.sh
+\`\`\`
+
+---
+
+### 🛠️ [Commands - 预定义任务](./commands/README.md)
+
+26 个预定义命令工具
+
+---
+
+## 🎓 完整学习路径
+
+### 第 1 周：TDD 核心 Skills（必学）⭐⭐⭐⭐⭐
+
+**Day 1-2**: 测试驱动开发
+\`\`\`bash
+cat docs/skills/test-driven-development-详解.md
+/test-driven-development
+\`\`\`
+
+**Day 3-4**: 设计和计划
+\`\`\`bash
+cat docs/skills/brainstorming-详解.md
+/brainstorming
+\`\`\`
+
+### 第 2 周：核心 Agents
+### 第 3 周：Hooks 自动化  
+### 第 4 周：企业级 Skills
+
+详见 [LEARNING_GUIDE.md](./LEARNING_GUIDE.md)
+
+---
+
+## 📂 文档结构
+
+\`\`\`
+docs/
+├── README.md                      # 本文件 - 总览
+├── agents/README.md               # Agents 能力总结
+├── skills/README.md               # Skills 能力总结  
+├── hooks/README.md                # Hooks 能力总结
+├── commands/README.md             # Commands 能力总结
+└── LEARNING_GUIDE.md              # 完整学习指南
+\`\`\`
+
+---
+
+<div align="center">
+
+**🎉 开始你的 Claude Code 学习之旅！**
+
+[Agents](./agents/) | [Skills](./skills/) | [Hooks](./hooks/) | [Commands](./commands/)
+
+</div>

@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/auto-tmux-dev.js"
+          }
+        ],
+        "description": "Auto-start dev servers in tmux"
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pre-bash-tmux-reminder.js"
+          }
+        ],
+        "description": "Remind to use tmux for long-running commands"
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pre-bash-git-push-reminder.js"
+          }
+        ],
+        "description": "Remind before git push"
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/doc-file-warning.js"
+          }
+        ],
+        "description": "Warn about non-standard .md/.txt files"
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/suggest-compact.js"
+          }
+        ],
+        "description": "Suggest manual compaction at logical intervals"
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/config-protection.js",
+            "timeout": 5
+          }
+        ],
+        "description": "Block modifications to linter/formatter configs"
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pre-compact.js"
+          }
+        ],
+        "description": "Save state before context compaction"
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/session-start.js"
+          }
+        ],
+        "description": "Load session context and detect package manager"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-bash-pr-created.js"
+          }
+        ],
+        "description": "Log PR URL after creation"
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-bash-build-complete.js",
+            "async": true,
+            "timeout": 30
+          }
+        ],
+        "description": "Background build analysis"
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/quality-gate.js",
+            "async": true,
+            "timeout": 30
+          }
+        ],
+        "description": "Quality checks after file edits"
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-edit-format.js"
+          }
+        ],
+        "description": "Auto-format JS/TS files (Biome/Prettier)"
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-edit-typecheck.js"
+          }
+        ],
+        "description": "TypeScript check after editing"
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-edit-console-warn.js"
+          }
+        ],
+        "description": "Warn about console.log statements"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-console-log.js"
+          }
+        ],
+        "description": "Check for console.log in modified files"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/session-end.js",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "Persist session state"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/evaluate-session.js",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "Evaluate session for patterns"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/cost-tracker.js",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "Track token and cost metrics"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/session-end-marker.js",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "Session end lifecycle marker"
+      }
+    ]
+  }
+}
