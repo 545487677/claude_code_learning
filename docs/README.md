@@ -4,7 +4,9 @@
 
 **Claude Code 组件能力总结、学习路径与测试指南**
 
-📅 更新时间: 2024-03-24
+📅 更新时间: 2026-03-25
+
+🆕 **最新更新**：添加完整的测试指南体系
 
 [English](#english) | [中文](#中文)
 
@@ -142,10 +144,52 @@ docs/
 
 ---
 
+## 🆕 测试指南体系
+
+### 快速测试入口
+- **[30分钟快速开始](./QUICK_START.md)** - 测试第一个 Skill/Agent/Command/Hook
+- **[完整学习路径](./INDEX.md)** - 系统化学习和测试所有组件
+
+### 按组件测试
+- **[Skills 测试指南](./skills/TESTING_GUIDE.md)** - 22+ Skills 完整测试方法
+- **[Agents 测试指南](./agents/TESTING_GUIDE.md)** - 100+ Agents 按领域测试
+- **[Commands 测试指南](./commands/TESTING_GUIDE.md)** - 150+ Commands 按命名空间测试
+- **[Hooks 测试指南](./hooks/TESTING_GUIDE.md)** - 25+ Hooks 按类型测试
+
+### 测试清单
+每个测试指南都包含：
+- ✅ 测试准备
+- ✅ 详细测试步骤
+- ✅ 预期行为
+- ✅ 评分标准
+- ✅ 问题排查
+- ✅ 测试报告模板
+
+---
+
+## 🚀 从这里开始
+
+### 初学者
+1. 阅读 **[快速开始指南](./QUICK_START.md)** (30分钟)
+2. 测试第一个 Skill: `paper-analysis`
+3. 测试第一个 Agent: `python-pro`
+
+### 进阶学习者
+1. 阅读 **[完整学习路径](./INDEX.md)**
+2. 选择你的路径（开发者/研究者/DevOps）
+3. 系统化测试所有组件
+
+### 高级用户
+1. 完成所有测试清单
+2. 创建自定义工作流
+3. 贡献到社区
+
+---
+
 <div align="center">
 
 **🎉 开始你的 Claude Code 学习之旅！**
 
-[Agents](./agents/) | [Skills](./skills/) | [Hooks](./hooks/) | [Commands](./commands/)
+[快速开始](./QUICK_START.md) | [学习路径](./INDEX.md) | [Agents](./agents/) | [Skills](./skills/) | [Hooks](./hooks/) | [Commands](./commands/)
 
 </div>
